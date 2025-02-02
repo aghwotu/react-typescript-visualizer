@@ -1,6 +1,7 @@
 // src/components/TypeScriptVisualizer.tsx
-import { useState } from 'react';
-import { ShikiHighlighter } from './ShikiHighlighter';
+import { useState, useEffect } from 'react';
+import { AnimatedCode } from './AnimatedCode';
+// import { ShikiHighlighter } from './ShikiHighlighter';
 
 type Step = {
   title: string;
@@ -245,12 +246,42 @@ interface ButtonClasses {
 
 const TypeScriptVisualizer = () => {
   const [currentStep, setCurrentStep] = useState(0);
+  const [transition, setTransition] = useState(0); // 0 to 1
+
+  // Auto-transition when step changes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTransition((prev) => {
+        if (prev >= 1) {
+          clearInterval(interval);
+          return 1;
+        }
+        return prev + 0.05;
+      });
+    }, 50);
+
+    return () => clearInterval(interval);
+  }, [currentStep]);
+
+  const handleNext = () => {
+    if (currentStep < steps.length - 1) {
+      setCurrentStep((prev) => prev + 1);
+      setTransition(0);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentStep > 0) {
+      setCurrentStep((prev) => prev - 1);
+      setTransition(0);
+    }
+  };
 
   return (
     <div className="w-full max-w-5xl mx-auto p-4 space-y-6 bg-gray-950 text-gray-200">
       <div className="flex items-center justify-between">
         <button
-          onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
+          onClick={handlePrevious}
           className="px-4 py-2 bg-gray-800 rounded flex items-center gap-2 disabled:opacity-50 hover:bg-gray-700 transition-colors"
           disabled={currentStep === 0}
         >
@@ -258,7 +289,7 @@ const TypeScriptVisualizer = () => {
         </button>
         <h2 className="text-xl font-semibold">{steps[currentStep].title}</h2>
         <button
-          onClick={() => setCurrentStep(Math.min(steps.length - 1, currentStep + 1))}
+          onClick={handleNext}
           className="px-4 py-2 bg-gray-800 rounded flex items-center gap-2 disabled:opacity-50 hover:bg-gray-700 transition-colors"
           disabled={currentStep === steps.length - 1}
         >
@@ -270,14 +301,22 @@ const TypeScriptVisualizer = () => {
         <div className="space-y-2">
           <h3 className="text-lg font-semibold text-blue-400">Type Definition</h3>
           <div className="bg-gray-900 rounded-lg p-4 overflow-auto text-xs">
-            <ShikiHighlighter code={steps[currentStep].interface} language="typescript" />
+            <AnimatedCode
+              startCode={steps[currentStep].interface}
+              endCode={steps[Math.min(currentStep + 1, steps.length - 1)].interface}
+              progress={transition}
+            />
           </div>
         </div>
 
         <div className="space-y-2">
           <h3 className="text-lg font-semibold text-green-400">Generated Structure</h3>
           <div className="bg-gray-900 rounded-lg p-4 overflow-auto text-xs">
-            <ShikiHighlighter code={steps[currentStep].implementation} language="typescript" />
+            <AnimatedCode
+              startCode={steps[currentStep].implementation}
+              endCode={steps[Math.min(currentStep + 1, steps.length - 1)].implementation}
+              progress={transition}
+            />
           </div>
         </div>
       </div>
@@ -290,7 +329,10 @@ const TypeScriptVisualizer = () => {
         {steps.map((_, index) => (
           <button
             key={index}
-            onClick={() => setCurrentStep(index)}
+            onClick={() => {
+              setCurrentStep(index);
+              setTransition(0);
+            }}
             className={`w-2 h-2 rounded-full transition-colors ${
               index === currentStep ? 'bg-blue-500' : 'bg-gray-700 hover:bg-gray-600'
             }`}
