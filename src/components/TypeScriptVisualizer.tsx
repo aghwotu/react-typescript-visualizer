@@ -302,8 +302,8 @@ const TypeScriptVisualizer = () => {
           <h3 className="text-lg font-semibold text-blue-400">Type Definition</h3>
           <div className="bg-gray-900 rounded-lg p-4 overflow-auto text-xs">
             <AnimatedCode
-              startCode={steps[currentStep].interface}
-              endCode={steps[Math.min(currentStep + 1, steps.length - 1)].interface}
+              startCode={steps[Math.max(currentStep - 1, 0)].interface}
+              endCode={steps[currentStep].interface}
               progress={transition}
             />
           </div>
@@ -313,8 +313,8 @@ const TypeScriptVisualizer = () => {
           <h3 className="text-lg font-semibold text-green-400">Generated Structure</h3>
           <div className="bg-gray-900 rounded-lg p-4 overflow-auto text-xs">
             <AnimatedCode
-              startCode={steps[currentStep].implementation}
-              endCode={steps[Math.min(currentStep + 1, steps.length - 1)].implementation}
+              startCode={steps[Math.max(currentStep - 1, 0)].implementation}
+              endCode={steps[currentStep].implementation}
               progress={transition}
             />
           </div>
