@@ -1,5 +1,5 @@
-// src/components/AnimatedCode.tsx
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { ShikiHighlighter } from './ShikiHighlighter';
 import diff_match_patch from 'diff-match-patch';
 
@@ -12,14 +12,14 @@ interface AnimatedCodeProps {
 
 export function AnimatedCode({ startCode, endCode, language = 'typescript', progress }: AnimatedCodeProps) {
   const [currentCode, setCurrentCode] = useState(startCode);
+  const previousCodeRef = useRef(startCode);
 
   useEffect(() => {
-    // Initialize diff-match-patch
     const dmp = new diff_match_patch();
     const diffs = dmp.diff_main(startCode, endCode);
     dmp.diff_cleanupSemantic(diffs);
 
-    // Calculate intermediate state
+    // Reconstruct the current state based on diffs and progress
     let result = '';
     let currentPosition = 0;
     const totalDiffLength = diffs.reduce((sum, [, text]) => sum + text.length, 0);
@@ -49,12 +49,15 @@ export function AnimatedCode({ startCode, endCode, language = 'typescript', prog
       }
     }
 
-    setCurrentCode(result);
+    if (result !== previousCodeRef.current) {
+      setCurrentCode(result);
+      previousCodeRef.current = result;
+    }
   }, [startCode, endCode, progress]);
 
   return (
-    <div className="transition-all duration-200">
+    <motion.div className="relative font-mono" layout transition={{ duration: 0.3, ease: 'easeInOut' }}>
       <ShikiHighlighter code={currentCode} language={language} />
-    </div>
+    </motion.div>
   );
 }
