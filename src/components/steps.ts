@@ -95,7 +95,12 @@ interface ButtonClasses {
   },
   {
     title: 'Adding Nested Structure to Variants',
-    interface: `interface ButtonClasses {
+    interface: `type ButtonVariant = 'primary' | 'success' | 'danger';
+type ButtonSize = 'sm' | 'md';
+type ButtonRadius = 'none' | 'sm' | 'md' | 'lg';
+type ButtonWeight = 'normal' | 'bold' | 'semibold';
+
+interface ButtonClasses {
   base: string;
   variants: Record<ButtonVariant, {
     base: string;
@@ -139,7 +144,12 @@ interface ButtonClasses {
   },
   {
     title: 'Adding Loading State',
-    interface: `interface ButtonClasses {
+    interface: `type ButtonVariant = 'primary' | 'success' | 'danger';
+type ButtonSize = 'sm' | 'md';
+type ButtonRadius = 'none' | 'sm' | 'md' | 'lg';
+type ButtonWeight = 'normal' | 'bold' | 'semibold';
+
+interface ButtonClasses {
   base: string;
   variants: Record<ButtonVariant, {
     base: string;
@@ -187,7 +197,12 @@ interface ButtonClasses {
   },
   {
     title: 'Adding Disabled State',
-    interface: `interface ButtonClasses {
+    interface: `type ButtonVariant = 'primary' | 'success' | 'danger';
+type ButtonSize = 'sm' | 'md';
+type ButtonRadius = 'none' | 'sm' | 'md' | 'lg';
+type ButtonWeight = 'normal' | 'bold' | 'semibold';
+
+interface ButtonClasses {
   base: string;
   variants: Record<ButtonVariant, {
     base: string;
