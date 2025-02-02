@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef } from 'react';
-import { motion } from 'framer-motion';
 import { ShikiHighlighter } from './ShikiHighlighter';
 import diff_match_patch from 'diff-match-patch';
 
@@ -55,9 +54,5 @@ export function AnimatedCode({ startCode, endCode, language = 'typescript', prog
     }
   }, [startCode, endCode, progress]);
 
-  return (
-    <motion.div className="relative font-mono" layout transition={{ duration: 0.3, ease: 'easeInOut' }}>
-      <ShikiHighlighter code={currentCode} language={language} />
-    </motion.div>
-  );
+  return <ShikiHighlighter code={currentCode} language={language} />;
 }
