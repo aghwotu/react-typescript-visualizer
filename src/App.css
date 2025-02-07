@@ -187,5 +187,10 @@ table {
 .fade-out {
   transition: opacity 0.5s ease-out, transform 0.3s ease-out;
   transform: translateY(3px);
-  opacity: 1;
+  opacity: 0; /* Set opacity to 0 so it fully disappears */
+  pointer-events: none; /* Prevent interaction */
+}
+
+.hidden {
+  display: none; /* Completely remove it */
 }

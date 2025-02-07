@@ -46,7 +46,7 @@ const AnimatedCode: React.FC<AnimatedCodeProps> = ({ startCode, endCode, progres
             key={i}
             className={`${isMoved ? 'text-gray-400 transition-transform duration-300' : ''} ${
               type === 1 ? 'fade-in text-green-400' : ''
-            } ${type === -1 ? 'fade-out text-red-400' : ''}`}
+            } ${type === -1 ? 'fade-out text-red-400 hidden' : ''}`}
             style={{
               opacity: type === 1 ? progress : 1, // Use progress to fade in new text
               transform: isMoved ? `translateY(${positions[i] * progress * 1.2}px)` : 'none',
