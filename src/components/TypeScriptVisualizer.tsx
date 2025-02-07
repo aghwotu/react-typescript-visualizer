@@ -14,9 +14,9 @@ const TypeScriptVisualizer = () => {
           clearInterval(interval);
           return 1;
         }
-        return prev + 0.05;
+        return prev + 0.02; // Slower transition to account for two phases
       });
-    }, 50);
+    }, 30);
 
     return () => clearInterval(interval);
   }, [currentStep]);

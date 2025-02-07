@@ -1,58 +1,63 @@
-import { useEffect, useState, useRef } from 'react';
-import { ShikiHighlighter } from './ShikiHighlighter';
-import diff_match_patch from 'diff-match-patch';
+import React, { useEffect, useState } from 'react';
+import { diff_match_patch } from 'diff-match-patch';
 
 interface AnimatedCodeProps {
   startCode: string;
   endCode: string;
-  language?: string;
-  progress: number;
+  progress: number; // 0 to 1 (used for animation)
 }
 
-export function AnimatedCode({ startCode, endCode, language = 'typescript', progress }: AnimatedCodeProps) {
-  const [currentCode, setCurrentCode] = useState(startCode);
-  const previousCodeRef = useRef(startCode);
+const dmp = new diff_match_patch();
+
+const AnimatedCode: React.FC<AnimatedCodeProps> = ({ startCode, endCode, progress }) => {
+  const [diffs, setDiffs] = useState<Array<[number, string]>>([]);
+  const [positions, setPositions] = useState<Record<number, number>>({});
 
   useEffect(() => {
-    const dmp = new diff_match_patch();
-    const diffs = dmp.diff_main(startCode, endCode);
-    dmp.diff_cleanupSemantic(diffs);
+    const computedDiffs = dmp.diff_main(startCode, endCode);
+    dmp.diff_cleanupSemantic(computedDiffs);
 
-    // Reconstruct the current state based on diffs and progress
-    let result = '';
-    let currentPosition = 0;
-    const totalDiffLength = diffs.reduce((sum, [, text]) => sum + text.length, 0);
-    const progressPosition = progress * totalDiffLength;
-
-    for (const [type, text] of diffs) {
-      const textLength = text.length;
-
+    let index = 0;
+    const posMap: Record<number, number> = {};
+    computedDiffs.forEach(([type, text]) => {
       if (type === 0) {
-        // EQUAL
-        result += text;
-        currentPosition += textLength;
+        // Track positions of unchanged text
+        for (let i = 0; i < text.length; i++) {
+          posMap[index] = dmp.diff_xIndex(computedDiffs, index);
+          index++;
+        }
       } else if (type === -1) {
-        // DELETE
-        if (currentPosition + textLength > progressPosition) {
-          const keepChars = Math.floor(textLength - (progressPosition - currentPosition));
-          result += text.slice(0, keepChars);
-        }
-        currentPosition += textLength;
-      } else if (type === 1) {
-        // INSERT
-        if (currentPosition < progressPosition) {
-          const insertChars = Math.min(textLength, Math.floor(progressPosition - currentPosition));
-          result += text.slice(0, insertChars);
-        }
-        currentPosition += textLength;
+        // Deletion
+        index += text.length;
       }
-    }
+    });
 
-    if (result !== previousCodeRef.current) {
-      setCurrentCode(result);
-      previousCodeRef.current = result;
-    }
-  }, [startCode, endCode, progress]);
+    setDiffs(computedDiffs);
+    setPositions(posMap);
+  }, [startCode, endCode]);
 
-  return <ShikiHighlighter code={currentCode} language={language} />;
-}
+  return (
+    <pre className="relative font-mono text-sm leading-relaxed">
+      {diffs.map(([type, text], i) => {
+        const isMoved = type === 0 && positions[i] !== undefined;
+
+        return (
+          <span
+            key={i}
+            className={`${isMoved ? 'text-gray-400 transition-transform duration-300' : ''} ${
+              type === 1 ? 'fade-in text-green-400' : ''
+            } ${type === -1 ? 'fade-out text-red-400' : ''}`}
+            style={{
+              opacity: type === 1 ? progress : 1, // Use progress to fade in new text
+              transform: isMoved ? `translateY(${positions[i] * progress * 1.2}px)` : 'none',
+            }}
+          >
+            {text}
+          </span>
+        );
+      })}
+    </pre>
+  );
+};
+
+export { AnimatedCode };
